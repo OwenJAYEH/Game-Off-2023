@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Q3Movement
 {
@@ -58,8 +59,14 @@ namespace Q3Movement
         private Transform m_Tran;
         private Transform m_CamTran;
 
+        private Vector2 moveInputValue;
+        private Vector2 lookInputValue;
+
+        private PlayerInput playerInput;
         private void Start()
         {
+            playerInput = GetComponent<PlayerInput>();
+
             m_Tran = transform;
             m_Character = GetComponent<CharacterController>();
 
@@ -70,9 +77,18 @@ namespace Q3Movement
             m_MouseLook.Init(m_Tran, m_CamTran);
         }
 
+        private void OnMove(InputValue value){
+            moveInputValue = value.Get<Vector2>();
+        }
+
+        private void OnLook(InputValue value)
+        {
+            m_MouseLook.lookInputValue = value.Get<Vector2>();
+        }
+
         private void Update()
         {
-            m_MoveInput = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
+            m_MoveInput = new Vector3(moveInputValue.x, 0, moveInputValue.y);
             m_MouseLook.UpdateCursorLock();    
             QueueJump();
 
@@ -98,16 +114,16 @@ namespace Q3Movement
         {
             if (m_AutoBunnyHop)
             {
-                m_JumpQueued = Input.GetButton("Jump");
+                m_JumpQueued = playerInput.actions["Jump"].IsPressed();
                 return;
             }
 
-            if (Input.GetButtonDown("Jump") && !m_JumpQueued)
+            if (playerInput.actions["Jump"].WasPressedThisFrame() && !m_JumpQueued)
             {
                 m_JumpQueued = true;
             }
 
-            if (Input.GetButtonUp("Jump"))
+            if (playerInput.actions["Jump"].WasReleasedThisFrame())
             {
                 m_JumpQueued = false;
             }
@@ -164,7 +180,7 @@ namespace Q3Movement
         private void AirControl(Vector3 targetDir, float targetSpeed)
         {
             // Only control air movement when moving forward or backward.
-            if (Mathf.Abs(m_MoveInput.z) < 0.001 || Mathf.Abs(targetSpeed) < 0.001)
+            if (Mathf.Abs(m_MoveInput.z) < 0.001 || Mathf.Abs(targetSpeed) < 0.001 || (Mathf.Abs(m_MoveInput.x) < 0.001))
             {
                 return;
             }
@@ -193,6 +209,8 @@ namespace Q3Movement
             m_PlayerVelocity.x *= speed;
             m_PlayerVelocity.y = zSpeed; // Note this line
             m_PlayerVelocity.z *= speed;
+
+            Debug.Log(m_PlayerVelocity);
         }
 
         // Handle ground movement.

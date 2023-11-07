@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Q3Movement
 {
@@ -22,6 +23,8 @@ namespace Q3Movement
         private Quaternion m_CameraTargetRot;
         private bool m_cursorIsLocked = true;
 
+        public Vector2 lookInputValue;
+
         public void Init(Transform character, Transform camera)
         {
             m_CharacterTargetRot = character.localRotation;
@@ -30,8 +33,8 @@ namespace Q3Movement
 
         public void LookRotation(Transform character, Transform camera)
         {
-            float yRot = Input.GetAxis("Mouse X") * m_XSensitivity;
-            float xRot = Input.GetAxis("Mouse Y") * m_YSensitivity;
+            float yRot = lookInputValue.x / 20 * m_XSensitivity;
+            float xRot = lookInputValue.y / 20 * m_YSensitivity;
 
             m_CharacterTargetRot *= Quaternion.Euler(0f, yRot, 0f);
             m_CameraTargetRot *= Quaternion.Euler(-xRot, 0f, 0f);
