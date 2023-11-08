@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Events;
 
 namespace Q3Movement
 {
@@ -9,6 +10,9 @@ namespace Q3Movement
     [RequireComponent(typeof(CharacterController))]
     public class Q3PlayerController : MonoBehaviour
     {
+        public UnityEvent eventSmallMode;
+        public UnityEvent eventBigMode;
+
         [System.Serializable]
         public class MovementSettings
         {
@@ -65,6 +69,12 @@ namespace Q3Movement
         private PlayerInput playerInput;
         private void Start()
         {
+            eventSmallMode = new UnityEvent();
+            eventSmallMode.AddListener(SmallMode);
+
+            eventBigMode = new UnityEvent();
+            eventBigMode.AddListener(BigMode);
+
             playerInput = GetComponent<PlayerInput>();
 
             m_Tran = transform;
@@ -84,6 +94,23 @@ namespace Q3Movement
         private void OnLook(InputValue value)
         {
             m_MouseLook.lookInputValue = value.Get<Vector2>();
+        }
+
+        private void SmallMode()
+        {
+            m_Gravity = 3;
+            m_JumpForce = 3;
+            m_AutoBunnyHop = true;
+            m_AirControl = .9f;
+            Debug.Log("I here in small");
+        }
+        private void BigMode()
+        {
+            m_Gravity = 20;
+            m_JumpForce = 8;
+            m_AutoBunnyHop = false;
+            m_AirControl = .3f;
+            Debug.Log("I here in big");
         }
 
         private void Update()
